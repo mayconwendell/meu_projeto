@@ -18,6 +18,7 @@ def abrir_pagina_professor():
     frame = ttk.Frame(root)
     frame.pack(pady=10, padx=10, fill='x')
 
+    # Cria campos de entrada para dados do trabalho
     for idx, campo in enumerate(campos):
         ttk.Label(frame, text=campo).grid(row=idx, column=0, sticky='e', pady=5)
         entry = ttk.Entry(frame, width=50)
@@ -30,20 +31,24 @@ def abrir_pagina_professor():
         tree.column(col, anchor='center', width=120)
     tree.pack(fill='both', expand=True, padx=10, pady=10)
 
+    # Faz uma rolagem vertical para a tabela
     scrollbar = ttk.Scrollbar(root, orient="vertical", command=tree.yview)
     tree.configure(yscroll=scrollbar.set)
     scrollbar.pack(side='right', fill='y')
 
+    # Lista os trabalhos na tabela
     def listar():
         tree.delete(*tree.get_children())
         cursor.execute("SELECT * FROM trabalhos")
         for row in cursor.fetchall():
             tree.insert('', 'end', values=row)
 
+    # Limpa os campos de entrada
     def limpar():
         for campo in campos:
             entradas[campo].delete(0, tk.END)
 
+    # Atualiza os campos com o trabalho selecionado na tabela
     def selecionar(event):
         selecionado = tree.selection()
         if selecionado:
@@ -53,6 +58,7 @@ def abrir_pagina_professor():
                 entradas[campo].delete(0, tk.END)
                 entradas[campo].insert(0, valores[i+1])
 
+    # Edita o trabalho selecionado no banco
     def editar():
         selecionado = tree.selection()
         if not selecionado:
@@ -69,6 +75,7 @@ def abrir_pagina_professor():
         listar()
         limpar()
 
+    # Deleta o trabalho selecionado
     def deletar():
         selecionado = tree.selection()
         if not selecionado:
@@ -81,6 +88,7 @@ def abrir_pagina_professor():
         listar()
         limpar()
 
+    # Limpa os trabalhos e reinicia os IDs
     def deletar_tudo():
         if messagebox.askyesno("Confirmação", "Tem certeza que deseja deletar todos os trabalhos? Esta ação não pode ser desfeita."):
             cursor.execute("DELETE FROM trabalhos")
@@ -90,6 +98,7 @@ def abrir_pagina_professor():
             limpar()
             messagebox.showinfo("Sucesso", "Todos os trabalhos foram deletados e o ID reiniciado.")
 
+    # Gera um relatório em uma nova janela com todos os trabalhos
     def gerar_relatorio():
         cursor.execute("SELECT * FROM trabalhos ORDER BY aluno_id")
         trabalhos = cursor.fetchall()
