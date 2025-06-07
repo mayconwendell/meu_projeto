@@ -25,6 +25,9 @@ def abrir_pagina_professor():
         entry.grid(row=idx, column=1, pady=5)
         entradas[campo] = entry
 
+    # Torna o campo de ID do Aluno somente leitura
+    entradas["ID do Aluno"].config(state='readonly')
+
     tree = ttk.Treeview(root, columns=("ID do Trabalho", "ID do Aluno", "Título", "Autor", "Curso", "Data de Entrega", "Orientador"), show="headings")
     for col in tree['columns']:
         tree.heading(col, text=col)
@@ -46,7 +49,9 @@ def abrir_pagina_professor():
     # Limpa os campos de entrada
     def limpar():
         for campo in campos:
+            entradas[campo].config(state='normal')
             entradas[campo].delete(0, tk.END)
+        entradas["ID do Aluno"].config(state='readonly')
 
     # Atualiza os campos com o trabalho selecionado na tabela
     def selecionar(event):
@@ -55,8 +60,11 @@ def abrir_pagina_professor():
             item = tree.item(selecionado)
             valores = item['values']
             for i, campo in enumerate(campos):
+                entradas[campo].config(state='normal')
                 entradas[campo].delete(0, tk.END)
                 entradas[campo].insert(0, valores[i+1])
+                if campo == "ID do Aluno":
+                    entradas[campo].config(state='readonly')
 
     # Edita o trabalho selecionado no banco
     def editar():
@@ -66,7 +74,20 @@ def abrir_pagina_professor():
             return
         item = tree.item(selecionado)
         id_trabalho = item['values'][0]
-        valores = [e.get() for e in entradas.values()]
+
+        entradas["ID do Aluno"].config(state='normal')
+        aluno_id = entradas["ID do Aluno"].get()
+        entradas["ID do Aluno"].config(state='readonly')
+
+        valores = [
+            aluno_id,
+            entradas["Título"].get(),
+            entradas["Autor"].get(),
+            entradas["Curso"].get(),
+            entradas["Data de Entrega"].get(),
+            entradas["Orientador"].get()
+        ]
+
         cursor.execute("""
             UPDATE trabalhos 
             SET aluno_id=?, titulo=?, autor=?, curso=?, data_entrega=?, orientador=? 
